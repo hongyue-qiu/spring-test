@@ -1,5 +1,6 @@
 package com.thoughtworks.rslist.service;
 
+import com.thoughtworks.rslist.domain.RsEvent;
 import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
@@ -13,8 +14,7 @@ import com.thoughtworks.rslist.repository.VoteRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,6 +86,31 @@ public class RsService {
       rsEventRepository.save(rsEvent);
       return ResponseEntity.ok().build();
     }
-
+  }
+  public void sortRsEvent(RsEvent rsEvent){
+    List<RsEventDto> rsEventsVote = rsEventRepository.findAll();
+    Collections.sort(rsEventsVote,new Comparator<RsEventDto>() {
+      public int compare(RsEventDto rsEventDto1, RsEventDto rsEventDto2) {
+        if (rsEventDto1.getVoteNum() > rsEventDto2.getVoteNum()) {
+          return -1;
+        }
+        if (rsEventDto1.getVoteNum() == rsEventDto2.getVoteNum()) {
+          return 0;
+        }
+        return 1;
+      }
+    });
+    Collections.sort(rsEventsVote,new Comparator<RsEventDto>() {
+      public int compare(RsEventDto rsEventDto1, RsEventDto rsEventDto2) {
+        if (rsEventDto1.getRank() > rsEventDto2.getRank()) {
+          return -1;
+        }
+        if (rsEventDto1.getRank() == rsEventDto2.getRank()) {
+          return 0;
+        }
+        return 1;
+      }
+    });
+    rsEventRepository.saveAll(rsEventsVote);
   }
 }

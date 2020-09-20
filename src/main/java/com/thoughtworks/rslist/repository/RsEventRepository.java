@@ -13,6 +13,7 @@ public interface RsEventRepository extends CrudRepository<RsEventDto, Integer> {
   List<RsEventDto> findRsEventByTradeRecord(int rank);
 //  List<RsEventDto> findRsEventByRank(int rank);
   RsEventDto findRsEventByRank(int rank);
+//  List<RsEventDto> findRsEventByVoteNum();
   RsEventDto findRsEventById(int id);
   @Transactional
   void deleteAllByUserId(int userId);

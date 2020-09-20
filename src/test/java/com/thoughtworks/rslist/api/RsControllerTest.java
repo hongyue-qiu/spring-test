@@ -215,6 +215,9 @@ class RsControllerTest {
     assertEquals(1,tradeDtos.size());
     assertEquals(5,tradeDtos.get(0).getAmount());
     assertEquals(1,tradeDtos.get(0).getRank());
+    List<RsEventDto> rsEventDtos =  rsEventRepository.findAll();
+    assertEquals(3,rsEventDtos.size());
+
 
   }
 
@@ -244,7 +247,6 @@ class RsControllerTest {
             .andExpect(status().isOk());
     RsEventDto newRsEvent = rsEventRepository.findById(rsEventDto3.getId()).get();
     assertEquals(3,newRsEvent.getRank());
-    List<TradeDto> tradeDtos =  tradeRepository.findAll();
 
   }
 
@@ -274,7 +276,37 @@ class RsControllerTest {
             .andExpect(status().isOk());
     RsEventDto newRsEvent = rsEventRepository.findById(rsEventDto3.getId()).get();
     assertEquals(2,newRsEvent.getRank());
-    List<TradeDto> tradeDtos =  tradeRepository.findAll();
+
+  }
+
+  @Test
+  void couldBuyRsEventRankForAnyAmountIfSomebodyByAndAmoutmoreAndDeleteEvent() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto =
+            RsEventDto.builder().keyword("无分类").eventName("第一条事件").rank(1).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    RsEventDto rsEventDto2 =
+            RsEventDto.builder().keyword("无分类").eventName("第二条事件").rank(2).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    RsEventDto rsEventDto3 =
+            RsEventDto.builder().keyword("无分类").eventName("第二条事件").rank(3).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto3);
+
+    TradeDto tradeDtoRecords= TradeDto.builder()
+            .amount(5)
+            .rank(2)
+            .build();
+    tradeRepository.save(tradeDtoRecords);
+    String jsonValue2 = "{\"amount\":6,\"rank\":2}";
+    mockMvc.perform(
+            post("/rs/buy/{id}", rsEventDto3.getId())
+                    .content(jsonValue2)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    RsEventDto newRsEvent = rsEventRepository.findById(rsEventDto3.getId()).get();
+    assertEquals(2,newRsEvent.getRank());
+    List<RsEventDto> rsEventDtos =  rsEventRepository.findAll();
+    assertEquals(2,rsEventDtos.size());
 
   }
 
