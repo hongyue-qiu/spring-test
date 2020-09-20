@@ -56,7 +56,6 @@ public class RsService {
   }
 
   public ResponseEntity buy(Trade trade, int id) {
-    RsEventDto tradeDtoRank = rsEventRepository.findRsEventByRank(trade.getRank());
     List<TradeDto> tradeDtos = tradeRepository.findAll();
     Optional<RsEventDto> repositoryById = rsEventRepository.findById(id);
     if (!repositoryById.isPresent()) {
@@ -87,7 +86,7 @@ public class RsService {
       return ResponseEntity.ok().build();
     }
   }
-  public void sortRsEvent(RsEvent rsEvent){
+  public void sortRsEvent(){
     List<RsEventDto> rsEventsVote = rsEventRepository.findAll();
     Collections.sort(rsEventsVote,new Comparator<RsEventDto>() {
       public int compare(RsEventDto rsEventDto1, RsEventDto rsEventDto2) {

@@ -310,4 +310,30 @@ class RsControllerTest {
 
   }
 
+  @Test
+  void shouldReturnTheRightListOnlyInVote() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto =
+            RsEventDto.builder().keyword("无分类").eventName("第一条事件").voteNum(5).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    RsEventDto rsEventDto2 =
+            RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    RsEventDto rsEventDto3 =
+            RsEventDto.builder().keyword("无分类").eventName("第三条事件").voteNum(8).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto3);
+    mockMvc.perform(
+            post("/rs/sortList", rsEventDto3.getId()))
+            .andExpect(status().isOk());
+
+    List<RsEventDto> rsEventDtos =  rsEventRepository.findAll();
+    assertEquals(2,rsEventDtos.size());
+    assertEquals("第三条事件",rsEventDtos.get(1).getEventName());
+    assertEquals("第一条事件",rsEventDtos.get(0).getEventName());
+
+//    assertEquals(rsEventDto,rsEventDtos.get(2));
+//    assertEquals(rsEventDto2,rsEventDtos.get(3));
+
+  }
+
 }

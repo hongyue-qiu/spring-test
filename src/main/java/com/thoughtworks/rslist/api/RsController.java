@@ -101,6 +101,12 @@ public class RsController {
     return ResponseEntity.ok().build();
   }
 
+  @PostMapping("/rs/sortList")
+  public ResponseEntity sortList(){
+    rsService.sortRsEvent();
+    return ResponseEntity.ok().build();
+  }
+
 
   @ExceptionHandler(RequestNotValidException.class)
   public ResponseEntity<Error> handleRequestErrorHandler(RequestNotValidException e) {
