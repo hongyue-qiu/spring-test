@@ -1,9 +1,11 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
+import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,7 @@ class RsControllerTest {
   @Autowired UserRepository userRepository;
   @Autowired RsEventRepository rsEventRepository;
   @Autowired VoteRepository voteRepository;
+  @Autowired TradeRepository tradeRepository;
   private UserDto userDto;
 
   @BeforeEach
@@ -42,6 +45,7 @@ class RsControllerTest {
     voteRepository.deleteAll();
     rsEventRepository.deleteAll();
     userRepository.deleteAll();
+    tradeRepository.deleteAll();
     userDto =
         UserDto.builder()
             .voteNum(10)
@@ -185,4 +189,33 @@ class RsControllerTest {
     assertEquals(voteDtos.size(), 1);
     assertEquals(voteDtos.get(0).getNum(), 1);
   }
+
+  @Test
+  void couldBuyRsEventTradeForAnyAmount() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto =
+            RsEventDto.builder().keyword("无分类").eventName("第一条事件").rank(1).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    rsEventDto =
+            RsEventDto.builder().keyword("无分类").eventName("第二条事件").rank(2).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    RsEventDto rsEventDto3 =
+            RsEventDto.builder().keyword("无分类").eventName("第二条事件").rank(3).user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto3);
+    String jsonValue = "{\"amount\":5,\"rank\":1}";
+    mockMvc.perform(
+                    post("/rs/buy/{id}", rsEventDto3.getId())
+                            .content(jsonValue)
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+    RsEventDto newRsEvent = rsEventRepository.findById(rsEventDto3.getId()).get();
+    assertEquals(1,newRsEvent.getRank());
+    List<TradeDto> tradeDtos =  tradeRepository.findAll();
+    assertEquals(1,tradeDtos.size());
+    assertEquals(5,tradeDtos.get(0).getAmount());
+    assertEquals(1,tradeDtos.get(0).getRank());
+
+  }
+
 }
