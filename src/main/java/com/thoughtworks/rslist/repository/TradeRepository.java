@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface TradeRepository extends CrudRepository<TradeDto, Integer> {
     List<TradeDto> findAll();
+
+//    List<TradeDto> findRsEventByTradeRecord(int rank);
 }

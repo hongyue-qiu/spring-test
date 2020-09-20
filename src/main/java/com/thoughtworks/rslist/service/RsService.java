@@ -10,9 +10,12 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RsService {
@@ -52,18 +55,37 @@ public class RsService {
     rsEventRepository.save(rsEvent);
   }
 
-  public void buy(Trade trade, int id) {
-    Optional<RsEventDto> rsEventDto = rsEventRepository.findById(id);
-    if (!rsEventDto.isPresent()) {
+  public ResponseEntity buy(Trade trade, int id) {
+    RsEventDto tradeDtoRank = rsEventRepository.findRsEventByRank(trade.getRank());
+    List<TradeDto> tradeDtos = tradeRepository.findAll();
+    Optional<RsEventDto> repositoryById = rsEventRepository.findById(id);
+    if (!repositoryById.isPresent()) {
       throw new RuntimeException();
     }
-    TradeDto tradeDto = TradeDto.builder()
-            .amount(trade.getAmount())
-            .rank(trade.getRank())
-            .build();
-    tradeRepository.save(tradeDto);
-    RsEventDto rsEvent = rsEventDto.get();
-    rsEvent.setRank(trade.getRank());
-    rsEventRepository.save(rsEvent);
+    if (tradeDtos.size() > 0){
+      if (trade.getAmount() > tradeDtos.get(tradeDtos.size()-1).getAmount()){
+        TradeDto tradeDto = TradeDto.builder()
+                .amount(trade.getAmount())
+                .rank(trade.getRank())
+                .build();
+        tradeRepository.save(tradeDto);
+        RsEventDto rsEvent = repositoryById.get();
+        rsEvent.setRank(trade.getRank());
+        rsEventRepository.save(rsEvent);
+        return ResponseEntity.ok().build();
+      }
+      return ResponseEntity.badRequest().build();
+    }else {
+      TradeDto tradeDto = TradeDto.builder()
+              .amount(trade.getAmount())
+              .rank(trade.getRank())
+              .build();
+      tradeRepository.save(tradeDto);
+      RsEventDto rsEvent = repositoryById.get();
+      rsEvent.setRank(trade.getRank());
+      rsEventRepository.save(rsEvent);
+      return ResponseEntity.ok().build();
+    }
+
   }
 }

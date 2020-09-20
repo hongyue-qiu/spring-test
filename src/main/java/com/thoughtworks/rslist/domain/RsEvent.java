@@ -17,5 +17,6 @@ public class RsEvent implements Serializable {
   @NotNull private String keyword;
   private int voteNum;
   private int rank;
+  private int amount;
   @NotNull private int userId;
 }
